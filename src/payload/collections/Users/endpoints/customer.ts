@@ -13,8 +13,8 @@ const logs = process.env.LOGS_STRIPE_PROXY === '1'
 // pass the proper method and body to this endpoint to interact with the Stripe API
 // available methods:
 // GET /api/users/:id/customer
-// POST /api/users/:id/customer
-// body: { customer: Stripe.CustomerUpdateParams }
+// PATCH /api/users/:id/customer
+// body: { name?: string, phone?: string }
 export const customerProxy: PayloadHandler = async (req: PayloadRequest, res) => {
   const { userID } = req.params
 
@@ -66,9 +66,22 @@ export const customerProxy: PayloadHandler = async (req: PayloadRequest, res) =>
     }
 
     if (req.method === 'PATCH') {
-      if (!req.body) throw new Error('No customer data provided')
-      // TODO: lock down the spread `customer` object to only allow certain fields
-      response = await stripe.customers.update(req.user.stripeCustomerID, req.body)
+      const data = req.body
+      if (
+        !data ||
+        typeof data !== 'object' ||
+        Array.isArray(data) ||
+        Object.keys(data).some(
+          key => !['name', 'phone'].includes(key) || typeof data[key] !== 'string' || data[key].length > 256,
+        )
+      ) {
+        res.status(400).json({ error: 'Only name and phone may be updated' })
+        return
+      }
+      const updates: Stripe.CustomerUpdateParams = {}
+      if (Object.prototype.hasOwnProperty.call(data, 'name')) updates.name = data.name
+      if (Object.prototype.hasOwnProperty.call(data, 'phone')) updates.phone = data.phone
+      response = await stripe.customers.update(req.user.stripeCustomerID, updates)
     }
 
     res.status(200).json(response)

@@ -2,6 +2,13 @@
 // Only framework presentation modules are substituted; application modules remain intact.
 const { mock } = require('node:test')
 const Module = require('node:module')
+// Payload's editor imports admin components through relative paths as well as
+// package exports. Their styles are normally consumed by the bundler, not Node.
+// Keep the JavaScript intact and provide the bundler's no-runtime-effect handling
+// for stylesheet imports in this server-side callback harness.
+for (const extension of ['.css', '.scss', '.sass']) {
+  require.extensions[extension] = module => { module.exports = {} }
+}
 const load = Module._load
 mock.method(Module, '_load', function (name, ...args) {
   if (name.startsWith('payload/components/') || name.startsWith('payload/dist/admin/')) {
@@ -63,7 +70,6 @@ async function write(config, env, operation, submitted, originalDoc = {}) {
   const allowed = access ? await access(args()) : true
   if (!allowed || (typeof allowed === 'object' && !matches(allowed, originalDoc))) return null
   for (const hook of config.hooks?.beforeOperation || []) await hook({ ...args(), args: args() })
-  for (const hook of config.hooks?.beforeValidate || []) data = (await hook(args())) || data
   async function fields(stage, list, siblingData, siblingDoc = {}) {
     for (const field of list) {
       if (!field.name) {
@@ -72,7 +78,7 @@ async function write(config, env, operation, submitted, originalDoc = {}) {
       }
       const fieldArgs = () => ({ ...args(), siblingData, siblingDoc,
         value: siblingData[field.name], originalDoc, previousValue: siblingDoc[field.name] })
-      if (stage === 'beforeChange' && field.access?.[operation] &&
+      if (stage === 'access' && field.access?.[operation] &&
           !await field.access[operation](fieldArgs())) {
         delete siblingData[field.name]
         continue
@@ -86,6 +92,10 @@ async function write(config, env, operation, submitted, originalDoc = {}) {
       }
     }
   }
+  // Field access restricts client-submitted values. It must not erase trusted
+  // values subsequently produced by collection hooks (such as a Stripe binding).
+  await fields('access', config.fields, data, originalDoc)
+  for (const hook of config.hooks?.beforeValidate || []) data = (await hook(args())) || data
   await fields('beforeValidate', config.fields, data, originalDoc)
   for (const hook of config.hooks?.beforeChange || []) data = (await hook(args())) || data
   await fields('beforeChange', config.fields, data, originalDoc)

@@ -22,7 +22,7 @@ export async function GET(
   }
 
   if (!token) {
-    new Response('You are not allowed to preview this page', { status: 403 })
+    return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
   // validate the Payload token
@@ -34,7 +34,7 @@ export async function GET(
 
   const userRes = await userReq.json()
 
-  if (!userReq.ok || !userRes?.user) {
+  if (!userReq.ok || !userRes?.user?.roles?.includes('admin')) {
     draftMode().disable()
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
@@ -43,7 +43,18 @@ export async function GET(
     return new Response('Invalid token', { status: 401 })
   }
 
+  let destination: URL
+  try {
+    const origin = new URL(process.env.NEXT_PUBLIC_SERVER_URL).origin
+    destination = new URL(url, origin)
+    if (destination.origin !== origin || destination.username || destination.password) {
+      return new Response('Invalid preview URL', { status: 400 })
+    }
+  } catch {
+    return new Response('Invalid preview URL', { status: 400 })
+  }
+
   draftMode().enable()
 
-  redirect(url)
+  redirect(destination.href)
 }
