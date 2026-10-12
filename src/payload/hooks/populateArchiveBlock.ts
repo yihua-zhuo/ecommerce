@@ -2,7 +2,7 @@ import type { AfterReadHook } from 'payload/dist/collections/config/types'
 
 import type { Page, Product } from '../payload-types'
 
-export const populateArchiveBlock: AfterReadHook = async ({ doc, context, req: { payload } }) => {
+export const populateArchiveBlock: AfterReadHook = async ({ doc, context, req: { payload, user } }) => {
   // pre-populate the archive block if `populateBy` is `collection`
   // then hydrate it on your front-end
 
@@ -19,6 +19,8 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, context, req: {
         if (archiveBlock.populateBy === 'collection' && !context.isPopulatingArchiveBlock) {
           const res: { totalDocs: number; docs: Product[] } = await payload.find({
             collection: archiveBlock?.relationTo || 'products',
+            overrideAccess: false,
+            user,
             limit: archiveBlock.limit || 10,
             context: {
               isPopulatingArchiveBlock: true,

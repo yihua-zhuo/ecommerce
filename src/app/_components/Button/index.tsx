@@ -34,6 +34,15 @@ export const Button: React.FC<Props> = ({
 }) => {
   let el = elFromProps
 
+  if (href) {
+    try {
+      const { protocol } = new URL(href, 'https://localhost')
+      if (!['http:', 'https:', 'mailto:', 'tel:'].includes(protocol)) return null
+    } catch {
+      return null
+    }
+  }
+
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 
   const className = [
