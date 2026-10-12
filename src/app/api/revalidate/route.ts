@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 export async function GET(request: NextRequest): Promise<Response> {
   const collection = request.nextUrl.searchParams.get('collection')
   const slug = request.nextUrl.searchParams.get('slug')
-  const secret = request.nextUrl.searchParams.get('secret')
+  const secret = request.headers.get('x-revalidation-key')
 
   if (
     !secret ||

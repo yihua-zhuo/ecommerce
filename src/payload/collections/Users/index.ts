@@ -76,6 +76,10 @@ const Users: CollectionConfig = {
       type: 'relationship',
       relationTo: 'products',
       hasMany: true,
+      access: {
+        create: admins,
+        update: admins,
+      },
       hooks: {
         beforeChange: [resolveDuplicatePurchases],
       },
@@ -86,6 +90,8 @@ const Users: CollectionConfig = {
       type: 'text',
       access: {
         read: ({ req: { user } }) => checkRole(['admin'], user),
+        create: admins,
+        update: admins,
       },
       admin: {
         position: 'sidebar',
