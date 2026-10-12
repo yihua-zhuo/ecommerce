@@ -110,6 +110,7 @@ const Users: CollectionConfig = {
           label: 'Items',
           type: 'array',
           interfaceName: 'CartItems',
+          maxRows: 50,
           fields: [
             {
               name: 'product',

@@ -82,6 +82,10 @@ export default buildConfig({
   }),
   // database-adapter-config-end
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+  upload: {
+    limits: { fileSize: 10 * 1024 * 1024 },
+    abortOnLimit: true,
+  },
   collections: [Pages, Products, Orders, Media, Categories, Users],
   globals: [Settings, Header, Footer],
   typescript: {
@@ -116,7 +120,7 @@ export default buildConfig({
     // You should delete this endpoint before deploying your site to production
     {
       path: '/seed',
-      method: 'get',
+      method: 'post',
       handler: seed,
     },
   ],
