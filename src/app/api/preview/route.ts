@@ -21,8 +21,18 @@ export async function GET(
     return new Response('No URL provided', { status: 404 })
   }
 
+  let destination: URL
+  try {
+    destination = new URL(url, req.url)
+    if (destination.origin !== new URL(req.url).origin) {
+      return new Response('Invalid preview URL', { status: 400 })
+    }
+  } catch {
+    return new Response('Invalid preview URL', { status: 400 })
+  }
+
   if (!token) {
-    new Response('You are not allowed to preview this page', { status: 403 })
+    return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
   // validate the Payload token
@@ -45,5 +55,5 @@ export async function GET(
 
   draftMode().enable()
 
-  redirect(url)
+  redirect(destination.href)
 }

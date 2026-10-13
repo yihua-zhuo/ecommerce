@@ -6,7 +6,6 @@ import adminsAndUser from './access/adminsAndUser'
 import { checkRole } from './checkRole'
 import { customerProxy } from './endpoints/customer'
 import { createStripeCustomer } from './hooks/createStripeCustomer'
-import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 import { loginAfterCreate } from './hooks/loginAfterCreate'
 import { resolveDuplicatePurchases } from './hooks/resolveDuplicatePurchases'
 import { CustomerSelect } from './ui/CustomerSelect'
@@ -61,9 +60,6 @@ const Users: CollectionConfig = {
           value: 'customer',
         },
       ],
-      hooks: {
-        beforeChange: [ensureFirstUserIsAdmin],
-      },
       access: {
         read: admins,
         create: admins,
@@ -73,6 +69,10 @@ const Users: CollectionConfig = {
     {
       name: 'purchases',
       label: 'Purchases',
+      access: {
+        create: admins,
+        update: admins,
+      },
       type: 'relationship',
       relationTo: 'products',
       hasMany: true,
@@ -86,6 +86,8 @@ const Users: CollectionConfig = {
       type: 'text',
       access: {
         read: ({ req: { user } }) => checkRole(['admin'], user),
+        create: admins,
+        update: admins,
       },
       admin: {
         position: 'sidebar',
@@ -104,6 +106,7 @@ const Users: CollectionConfig = {
           label: 'Items',
           type: 'array',
           interfaceName: 'CartItems',
+          maxRows: 20,
           fields: [
             {
               name: 'product',

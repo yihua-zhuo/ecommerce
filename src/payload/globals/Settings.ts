@@ -1,5 +1,7 @@
 import type { GlobalConfig } from 'payload/types'
 
+import { admins } from '../access/admins'
+
 export const Settings: GlobalConfig = {
   slug: 'settings',
   typescript: {
@@ -10,6 +12,7 @@ export const Settings: GlobalConfig = {
   },
   access: {
     read: () => true,
+    update: admins,
   },
   fields: [
     {

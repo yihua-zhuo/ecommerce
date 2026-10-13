@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 
 import { Page } from '../../../payload/payload-types'
+import { isSafeURL } from '../../../payload/utilities/isSafeURL'
 import { Button, Props as ButtonProps } from '../Button'
 
 type CMSLinkType = {
@@ -37,7 +38,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
         }`
       : url
 
-  if (!href) return null
+  if (!href || !isSafeURL(href)) return null
 
   if (!appearance) {
     const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}

@@ -1,6 +1,7 @@
 import type { Field } from 'payload/types'
 
 import deepMerge from '../utilities/deepMerge'
+import { isSafeURL } from '../utilities/isSafeURL'
 
 export const appearanceOptions = {
   primary: {
@@ -88,6 +89,8 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
       label: 'Custom URL',
       type: 'text',
       required: true,
+      validate: (value, { siblingData }) =>
+        siblingData?.type !== 'custom' || isSafeURL(value) || 'Enter a safe URL',
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'custom',
       },

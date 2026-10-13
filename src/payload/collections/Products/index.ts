@@ -7,6 +7,7 @@ import { Content } from '../../blocks/Content'
 import { MediaBlock } from '../../blocks/MediaBlock'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
+import { adminsOrPublished } from '../Pages/access/adminsOrPublished'
 import { checkUserPurchases } from './access/checkUserPurchases'
 import { beforeProductChange } from './hooks/beforeChange'
 import { deleteProductFromCarts } from './hooks/deleteProductFromCarts'
@@ -34,7 +35,8 @@ const Products: CollectionConfig = {
     drafts: true,
   },
   access: {
-    read: () => true,
+    read: adminsOrPublished,
+    readVersions: admins,
     create: admins,
     update: admins,
     delete: admins,

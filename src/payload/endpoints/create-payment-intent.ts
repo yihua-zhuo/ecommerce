@@ -29,6 +29,12 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
     return
   }
 
+  const items = fullUser.cart?.items
+  if (!Array.isArray(items) || items.length === 0 || items.length > 20) {
+    res.status(400).json({ error: 'Cart must contain between 1 and 20 items' })
+    return
+  }
+
   try {
     let stripeCustomerID = fullUser?.stripeCustomerID
 
