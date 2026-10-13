@@ -1,0 +1,10 @@
+{
+  "projects": [
+    {
+      "path": ".",
+      "image": "node:18.20.8",
+      "setup": "yarn install --frozen-lockfile && npm install --no-save --package-lock=false --legacy-peer-deps mock-require@3.0.3 yaml@2.6.1",
+      "mayWrite": ["tests/security/**"]
+    }
+  ]
+}
