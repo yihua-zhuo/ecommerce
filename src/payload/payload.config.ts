@@ -12,6 +12,7 @@ import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
+import { admins } from './access/admins'
 import Categories from './collections/Categories'
 import { Media } from './collections/Media'
 import { Orders } from './collections/Orders'
@@ -81,6 +82,10 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
+  upload: {
+    limits: { fileSize: 5 * 1024 * 1024 },
+    abortOnLimit: true,
+  },
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   collections: [Pages, Products, Orders, Media, Categories, Users],
   globals: [Settings, Header, Footer],
@@ -135,6 +140,14 @@ export default buildConfig({
     }),
     redirects({
       collections: ['pages', 'products'],
+      overrides: {
+        access: {
+          read: () => true,
+          create: admins,
+          update: admins,
+          delete: admins,
+        },
+      },
     }),
     nestedDocs({
       collections: ['categories'],
