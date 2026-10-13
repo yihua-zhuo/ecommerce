@@ -121,7 +121,7 @@ export default buildConfig({
     // You should delete this endpoint before deploying your site to production
     {
       path: '/seed',
-      method: 'get',
+      method: 'post',
       handler: seed,
     },
   ],

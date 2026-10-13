@@ -48,10 +48,13 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
 
     // lookup user in Stripe and create one if not found
     if (!stripeCustomerID) {
-      const customer = await stripe.customers.create({
-        email: fullUser?.email,
-        name: fullUser?.name,
-      })
+      const customer = await stripe.customers.create(
+        {
+          email: fullUser?.email,
+          name: fullUser?.name,
+        },
+        { idempotencyKey: `checkout-customer-${user.id}` },
+      )
 
       stripeCustomerID = customer.id
 
@@ -108,7 +111,18 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
     }
 
     const idempotencyKey = createHash('sha256')
-      .update(JSON.stringify([user.id, stripeCustomerID, items, total, Math.floor(Date.now() / 300000)]))
+      .update(
+        JSON.stringify([
+          user.id,
+          stripeCustomerID,
+          items.map(({ id, product, quantity }) => [
+            id,
+            typeof product === 'string' ? product : product?.id,
+            quantity,
+          ]),
+          total,
+        ]),
+      )
       .digest('hex')
     const paymentIntent = await stripe.paymentIntents.create(
       {

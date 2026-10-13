@@ -16,6 +16,24 @@ export const seed: PayloadHandler = async (req, res): Promise<void> => {
     return
   }
 
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' })
+    return
+  }
+
+  let trustedOrigin: string
+  try {
+    trustedOrigin = new URL(process.env.PAYLOAD_PUBLIC_SERVER_URL || '').origin
+  } catch {
+    res.status(403).json({ error: 'Forbidden' })
+    return
+  }
+
+  if (trustedOrigin === 'null' || req.headers.origin !== trustedOrigin) {
+    res.status(403).json({ error: 'Forbidden' })
+    return
+  }
+
   try {
     await seedScript(payload)
     res.json({ success: true })

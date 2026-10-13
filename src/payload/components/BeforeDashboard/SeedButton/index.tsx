@@ -14,7 +14,8 @@ export const SeedButton: React.FC = () => {
 
       setTimeout(async () => {
         try {
-          await fetch('/api/seed')
+          const response = await fetch('/api/seed', { method: 'POST' })
+          if (!response.ok) throw new Error('Unable to seed database')
           setSeeded(true)
         } catch (err) {
           setError(err)
