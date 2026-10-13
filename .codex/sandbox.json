@@ -1,0 +1,11 @@
+{
+  "projects": [
+    {
+      "path": ".",
+      "image": "node:18-bookworm",
+      "setup": "yarn install --frozen-lockfile --non-interactive",
+      "test": "node --test tests/security/*.test.cjs",
+      "mayWrite": ["tests/**"]
+    }
+  ]
+}
