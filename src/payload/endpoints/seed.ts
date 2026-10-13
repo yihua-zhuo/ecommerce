@@ -1,5 +1,6 @@
 import type { PayloadHandler } from 'payload/config'
 
+import { admins } from '../access/admins'
 import { seed as seedScript } from '../seed'
 
 export const seed: PayloadHandler = async (req, res): Promise<void> => {
@@ -7,6 +8,11 @@ export const seed: PayloadHandler = async (req, res): Promise<void> => {
 
   if (!user) {
     res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  if (!admins({ req })) {
+    res.status(403).json({ error: 'Forbidden' })
     return
   }
 

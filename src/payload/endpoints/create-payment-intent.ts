@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import type { PayloadHandler } from 'payload/config'
 import Stripe from 'stripe'
 
@@ -26,6 +27,19 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
 
   if (!fullUser) {
     res.status(404).json({ error: 'User not found' })
+    return
+  }
+
+  const items = fullUser.cart?.items
+  if (
+    !Array.isArray(items) ||
+    items.length === 0 ||
+    items.length > 100 ||
+    items.some(item =>
+      !Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 1000,
+    )
+  ) {
+    res.status(400).json({ error: 'Cart must contain 1–100 items with integer quantities from 1–1000' })
     return
   }
 
@@ -89,16 +103,22 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
       }),
     )
 
-    if (total === 0) {
+    if (!Number.isSafeInteger(total) || total <= 0 || total > 99999999) {
       throw new Error('There is nothing to pay for, add some items to your cart and try again.')
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      customer: stripeCustomerID,
-      amount: total,
-      currency: 'usd',
-      payment_method_types: ['card'],
-    })
+    const idempotencyKey = createHash('sha256')
+      .update(JSON.stringify([user.id, stripeCustomerID, items, total, Math.floor(Date.now() / 300000)]))
+      .digest('hex')
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        customer: stripeCustomerID,
+        amount: total,
+        currency: 'usd',
+        payment_method_types: ['card'],
+      },
+      { idempotencyKey },
+    )
 
     res.send({ client_secret: paymentIntent.client_secret })
   } catch (error: unknown) {
