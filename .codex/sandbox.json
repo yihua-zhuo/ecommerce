@@ -1,0 +1,10 @@
+{
+  "projects": [
+    {
+      "path": ".",
+      "image": "node:18.20.8",
+      "setup": "yarn install --frozen-lockfile --non-interactive",
+      "mayWrite": ["tests/**"]
+    }
+  ]
+}
