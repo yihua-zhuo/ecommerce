@@ -1,11 +1,12 @@
 import type { PayloadHandler } from 'payload/config'
 
+import { checkRole } from '../collections/Users/checkRole'
 import { seed as seedScript } from '../seed'
 
 export const seed: PayloadHandler = async (req, res): Promise<void> => {
   const { user, payload } = req
 
-  if (!user) {
+  if (!user || !checkRole(['admin'], user)) {
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
