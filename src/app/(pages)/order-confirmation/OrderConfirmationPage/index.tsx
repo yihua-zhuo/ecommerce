@@ -1,11 +1,10 @@
 'use client'
 
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 import { Button } from '../../../_components/Button'
 import { Message } from '../../../_components/Message'
-import { useCart } from '../../../_providers/Cart'
 
 import classes from './index.module.scss'
 
@@ -13,12 +12,6 @@ export const OrderConfirmationPage: React.FC<{}> = () => {
   const searchParams = useSearchParams()
   const orderID = searchParams.get('order_id')
   const error = searchParams.get('error')
-
-  const { clearCart } = useCart()
-
-  useEffect(() => {
-    clearCart()
-  }, [clearCart])
 
   return (
     <div>

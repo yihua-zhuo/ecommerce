@@ -11,6 +11,12 @@ export const seed: PayloadHandler = async (req, res): Promise<void> => {
     return
   }
 
+  if (req.method !== 'POST' || req.get('origin') !== process.env.PAYLOAD_PUBLIC_SERVER_URL ||
+      req.get('x-seed-intent') !== 'seed') {
+    res.status(403).json({ error: 'Explicit same-origin seed request required' })
+    return
+  }
+
   try {
     await seedScript(payload)
     res.json({ success: true })
