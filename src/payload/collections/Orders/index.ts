@@ -6,6 +6,7 @@ import { adminsOrOrderedBy } from './access/adminsOrOrderedBy'
 import { clearUserCart } from './hooks/clearUserCart'
 import { populateOrderedBy } from './hooks/populateOrderedBy'
 import { updateUserPurchases } from './hooks/updateUserPurchases'
+import { verifyPayment } from './hooks/verifyPayment'
 import { LinkToPaymentIntent } from './ui/LinkToPaymentIntent'
 
 export const Orders: CollectionConfig = {
@@ -16,6 +17,7 @@ export const Orders: CollectionConfig = {
     preview: doc => `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/orders/${doc.id}`,
   },
   hooks: {
+    beforeValidate: [verifyPayment],
     afterChange: [updateUserPurchases, clearUserCart],
   },
   access: {
@@ -36,6 +38,7 @@ export const Orders: CollectionConfig = {
     {
       name: 'stripePaymentIntentID',
       label: 'Stripe Payment Intent ID',
+      unique: true,
       type: 'text',
       admin: {
         position: 'sidebar',

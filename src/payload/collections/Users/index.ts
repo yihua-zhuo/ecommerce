@@ -6,7 +6,6 @@ import adminsAndUser from './access/adminsAndUser'
 import { checkRole } from './checkRole'
 import { customerProxy } from './endpoints/customer'
 import { createStripeCustomer } from './hooks/createStripeCustomer'
-import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 import { loginAfterCreate } from './hooks/loginAfterCreate'
 import { resolveDuplicatePurchases } from './hooks/resolveDuplicatePurchases'
 import { CustomerSelect } from './ui/CustomerSelect'
@@ -61,9 +60,6 @@ const Users: CollectionConfig = {
           value: 'customer',
         },
       ],
-      hooks: {
-        beforeChange: [ensureFirstUserIsAdmin],
-      },
       access: {
         read: admins,
         create: admins,
@@ -73,6 +69,7 @@ const Users: CollectionConfig = {
     {
       name: 'purchases',
       label: 'Purchases',
+      access: { create: admins, update: admins },
       type: 'relationship',
       relationTo: 'products',
       hasMany: true,
@@ -85,7 +82,9 @@ const Users: CollectionConfig = {
       label: 'Stripe Customer',
       type: 'text',
       access: {
-        read: ({ req: { user } }) => checkRole(['admin'], user),
+        read: admins,
+        create: admins,
+        update: admins,
       },
       admin: {
         position: 'sidebar',
@@ -104,6 +103,7 @@ const Users: CollectionConfig = {
           label: 'Items',
           type: 'array',
           interfaceName: 'CartItems',
+          maxRows: 20,
           fields: [
             {
               name: 'product',
@@ -113,7 +113,12 @@ const Users: CollectionConfig = {
             {
               name: 'quantity',
               type: 'number',
-              min: 0,
+              required: true,
+              min: 1,
+              max: 100,
+              validate: value =>
+                (Number.isSafeInteger(value) && value >= 1 && value <= 100) ||
+                'Quantity must be an integer between 1 and 100',
               admin: {
                 step: 1,
               },

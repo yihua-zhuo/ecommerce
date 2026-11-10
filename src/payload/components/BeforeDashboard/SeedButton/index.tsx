@@ -14,7 +14,11 @@ export const SeedButton: React.FC = () => {
 
       setTimeout(async () => {
         try {
-          await fetch('/api/seed')
+          const response = await fetch('/api/seed', {
+            method: 'POST',
+            headers: { 'X-Seed-Intent': 'seed' },
+          })
+          if (!response.ok) throw new Error('Seeding refused')
           setSeeded(true)
         } catch (err) {
           setError(err)

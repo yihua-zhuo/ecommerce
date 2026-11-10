@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import Link from 'next/link'
 
 import { Settings } from '../../../../payload/payload-types'
@@ -15,21 +15,18 @@ export const LogoutPage: React.FC<{
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    const performLogout = async () => {
-      try {
-        await logout()
-        setSuccess('Logged out successfully.')
-      } catch (_) {
-        setError('You are already logged out.')
-      }
+  const performLogout = async () => {
+    try {
+      await logout()
+      setSuccess('Logged out successfully.')
+    } catch (_) {
+      setError('You are already logged out.')
     }
-
-    performLogout()
-  }, [logout])
+  }
 
   return (
     <Fragment>
+      {!success && !error && <button type="button" onClick={performLogout}>Log out</button>}
       {(error || success) && (
         <div>
           <h1>{error || success}</h1>

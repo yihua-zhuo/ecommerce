@@ -68,6 +68,7 @@ export default buildConfig({
             [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/seed')]: mockModulePath,
+            [path.resolve(__dirname, 'collections/Orders/hooks/verifyPayment')]: mockModulePath,
             stripe: mockModulePath,
             express: mockModulePath,
           },
@@ -116,7 +117,7 @@ export default buildConfig({
     // You should delete this endpoint before deploying your site to production
     {
       path: '/seed',
-      method: 'get',
+      method: 'post',
       handler: seed,
     },
   ],

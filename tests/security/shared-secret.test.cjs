@@ -1,0 +1,10 @@
+const assert = require('node:assert/strict')
+const test = require('node:test')
+const fs = require('node:fs')
+const path = require('node:path')
+test('the environment template does not distribute a usable shared authentication secret', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../.env.example'), 'utf8')
+  const value = (source.match(/^\s*PAYLOAD_SECRET\s*=\s*(.*)$/m)?.[1] || '').replace(/\s+#.*$/, '').replace(/^['"]|['"]$/g, '').trim()
+  const placeholder = /^(?:<[^>]+>|\$\{[^}]+\}|(?:YOUR|REPLACE|CHANGE|GENERATE|INSERT)[-_ ].*)$/i.test(value)
+  assert.ok(!value || placeholder, 'Environment template must not publish a usable shared PAYLOAD_SECRET')
+})
